@@ -23,7 +23,8 @@ export function cutUpString(str)
         for (var i = ind; i < str.length; i++)
         {
             var charC = str.charCodeAt(i);
-            if (!(cover(charC, cc.A, cc.Z) || cover(charC, cc.a, cc.z) || cover(charC, cc.n0, cc.n9) || charC == cc["_"]))
+            var charS = str[i];
+            if (!(cover(charC, cc.A, cc.Z) || cover(charC, cc.a, cc.z) || cover(charC, cc.n0, cc.n9) || charS == "_"))
                 return str.slice(ind, j = i);
         }
         throw "[nac]cutUpString: getIdentifier error";
@@ -154,7 +155,7 @@ export function cutUpString(str)
             ret.push(getOperator(i));
             i = j;
         }
-        else if (isAmong(charS, "{", "}", ";", ",")) // 符号
+        else if (isAmong(charS, "{", "}", ";")) // 符号
         {
             ret.push(charS);
             i++;

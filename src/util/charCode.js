@@ -1,3 +1,6 @@
+/**
+ * unicode对应值
+ */
 export const cc = {
     "n0": 48,
     "n1": 49,
