@@ -1,3 +1,14 @@
+import { isAmong } from "../util/forEach.js";
+
+/**
+ * 片段是否是空白字符
+ * @param {string} s
+ */
+export function isBlank(s)
+{
+    return isAmong(s, "\n", "\t", "\r", " ");
+}
+
 /**
  * 词流
  */
@@ -34,7 +45,7 @@ export class wordFlow
     constructor(arr, now, nowEnd)
     {
         this.arr = arr;
-        this.now = this.firstInd = now;
+        this.nowInd = this.firstInd = now;
         this.endInd = nowEnd;
     }
 
@@ -48,7 +59,7 @@ export class wordFlow
     }
 
     /**
-     * 弹出一个词
+     * 弹出并获取一个词
      * 流结束则为null
      * @returns {any}
      */
@@ -71,6 +82,34 @@ export class wordFlow
             return this.arr[this.nowInd];
         else
             return null;
+    }
+
+    /**
+     * 跳转当前位置
+     * @param {number} ind
+     */
+    jump(ind)
+    {
+        this.nowInd += ind;
+    }
+
+    /**
+     * 循环弹出并获取第一个非空白
+     * 返回的词不会被弹出
+     * 之前的空白词将弹出
+     * @returns {any}
+     */
+    nonBlank()
+    {
+        while (this.unfinished())
+        {
+            var now = this.now();
+            if (isBlank(now))
+                this.pop();
+            else
+                return now;
+        }
+        return null;
     }
 
     /**
@@ -104,11 +143,48 @@ export class wordFlow
 
     /**
      * 获取一个子流
-     * @param {number} l 
-     * @param {number} r 
+     * 下标从开始位置开始
+     * @param {number} [l]
+     * @param {number} [r]
      */
-    slice(l, r)
+    slice(l = 0, r = this.endInd - this.firstInd)
     {
         return new wordFlow(this.arr, this.firstInd + l, this.firstInd + r);
+    }
+    /**
+     * 获取一个子流
+     * 下标从当前位置开始
+     * @param {number} [l]
+     * @param {number} [r]
+     */
+    sliceFromNow(l = 0, r = this.endInd - this.nowInd)
+    {
+        return new wordFlow(this.arr, this.nowInd + l, this.nowInd + r);
+    }
+
+    /**
+     * 获取一个代码块的词流
+     * 当前位置应当为一个左大括号
+     * 获取到的词流不包括收尾大括号
+     * @returns {wordFlow}
+     */
+    getBlock()
+    {
+        if (this.now() != "{")
+            throw "[nac]wordFlow: getBlock error";
+        this.pop();
+        var oldInd = this.nowInd; // 开始位置 不包括大括号
+        var num = 1; // 大括号计数
+        while (this.unfinished())
+        {
+            var now = this.pop();
+            if (now == "{")
+                num++;
+            else if (now == "}")
+                num--;
+            if (num <= 0) // 代码块结束
+                return this.slice(oldInd, this.nowInd - 1);
+        }
+        throw "[nac]wordFlow: getBlock error";
     }
 }

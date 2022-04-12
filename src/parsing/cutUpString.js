@@ -1,6 +1,7 @@
 import { cc, cover } from "../util/charCode.js";
 import { isAmong } from "../util/forEach.js";
 import { ot, otFirst } from "./operatorTable.js";
+import { isBlank } from "./wordFlow.js";
 
 /**
  * 分解字符串 至最小单位(标识符,符号,值)
@@ -109,7 +110,7 @@ export function cutUpString(str)
         {
             if (str[i] == "\n")
                 incN = true;
-            if (!isAmong(str[i], "\n", "\t", "\r", " "))
+            if (!isBlank(str[i]))
             {
                 j = i;
                 return incN;
@@ -160,7 +161,7 @@ export function cutUpString(str)
             ret.push(charS);
             i++;
         }
-        else if (isAmong(charS, "\n", "\t", "\r", " ")) // 跳过字符
+        else if (isBlank(charS)) // 跳过字符
         {
             if (skipWhitespace(i))
                 ret.push("\n");
